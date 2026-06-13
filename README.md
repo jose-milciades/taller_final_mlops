@@ -43,6 +43,11 @@ curl -X POST http://localhost:8000/predict \
   -d '{"inputs":[[1,2,3,4]]}'
 ```
 
+Endpoints desplegados:
+
+- Dev: `https://mlops-onnx-api-dev-to5xh2n5qq-uc.a.run.app`
+- Prod: `https://mlops-onnx-api-prod-to5xh2n5qq-uc.a.run.app`
+
 ## Pendiente de configurar
 
 Para completar el despliegue real faltan los datos del proveedor cloud:
