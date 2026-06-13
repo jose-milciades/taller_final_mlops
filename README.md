@@ -48,15 +48,79 @@ Endpoints desplegados:
 - Dev: `https://mlops-onnx-api-dev-to5xh2n5qq-uc.a.run.app`
 - Prod: `https://mlops-onnx-api-prod-to5xh2n5qq-uc.a.run.app`
 
-## Pendiente de configurar
+## Evidencia de entrega
 
-Para completar el despliegue real faltan los datos del proveedor cloud:
+Repositorio:
 
-- bucket de Google Cloud Storage para el modelo ONNX;
-- bucket de Google Cloud Storage para datos de prueba;
-- Artifact Registry para la imagen Docker;
-- Cloud Run para endpoints `dev` y `prod`;
-- secreto `GCP_SA_KEY` en GitHub Actions.
+- `https://github.com/jose-milciades/taller_final_mlops`
+
+Ramas:
+
+- `dev`
+- `prod`
+
+Pipeline:
+
+- Workflow: `.github/workflows/ci-cd.yml`
+- Trigger: `push` a `dev` y `prod`
+- Etapas: `test` y `build-promote`
+
+Corridas exitosas de GitHub Actions:
+
+- Dev por `push`: `https://github.com/jose-milciades/taller_final_mlops/actions/runs/27455239829`
+- Prod por `push`: `https://github.com/jose-milciades/taller_final_mlops/actions/runs/27455330904`
+
+Artefactos externos al repositorio:
+
+- Modelo ONNX: `gs://bucket_taller_mlops/model.onnx`
+- Datos de prueba: `gs://bucket_taller_mlops/test_data.json`
+- Predicciones dev: `gs://bucket_taller_mlops/predicciones_dev.txt`
+- Predicciones prod: `gs://bucket_taller_mlops/predicciones_prod.txt`
+
+Contenedores:
+
+- Registry: `us-central1-docker.pkg.dev/maestriaia/taller-artifact-registry`
+- Servicio Cloud Run dev: `mlops-onnx-api-dev`
+- Servicio Cloud Run prod: `mlops-onnx-api-prod`
+
+Pruebas de endpoints:
+
+```bash
+curl https://mlops-onnx-api-dev-to5xh2n5qq-uc.a.run.app/health
+curl https://mlops-onnx-api-prod-to5xh2n5qq-uc.a.run.app/health
+```
+
+Respuestas verificadas:
+
+```json
+{"status":"ok","environment":"dev"}
+{"status":"ok","environment":"prod"}
+```
+
+Prueba de prediccion:
+
+```bash
+curl -X POST https://mlops-onnx-api-dev-to5xh2n5qq-uc.a.run.app/predict \
+  -H "Content-Type: application/json" \
+  -d '{"inputs":[[1,2,3,4]]}'
+
+curl -X POST https://mlops-onnx-api-prod-to5xh2n5qq-uc.a.run.app/predict \
+  -H "Content-Type: application/json" \
+  -d '{"inputs":[[1,2,3,4]]}'
+```
+
+Respuesta verificada:
+
+```json
+{"environment":"dev","prediction":[[3.3000001907348633]]}
+{"environment":"prod","prediction":[[3.3000001907348633]]}
+```
+
+Ejemplo de linea registrada en los archivos TXT de monitoreo:
+
+```json
+{"timestamp": "2026-06-13T03:23:55.341472+00:00", "environment": "dev", "payload": {"inputs": [[1.0, 2.0, 3.0, 4.0]]}, "prediction": [[3.3000001907348633]]}
+```
 
 ## Variables para GitHub Actions en GCP
 
