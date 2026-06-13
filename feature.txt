@@ -1,0 +1,41 @@
+Sistemas de despliegue automático (35% del curso)
+Para alguna aplicación en específico, se necesita proponer un sistema que pueda hacer un despliegue automático para un modelo existente. Es decir, considerando que ya existe un modelo actual en producción, se debe desarrollar un sistema que permita que nuevos modelos puedan ser desplegados de forma automática para que los usuarios finales puedan hacer uso de estos. Para el desarrollo de este sistema, se deben considerar los siguientes puntos:
+
+Debe existir un repositorio en GitHub con un pipeline de CI/CD con GitHub Actions para el despliegue automático a proponer.
+El repositorio debe contener dos ramas, dev y prod, y cada rama debe tener un endpoint asociado en la solución final. Esta solución final hace referencia a algún servicio en la nube que puedan usar para desplegar el contenedor. Más adelante se detalla un poco mejor.
+Deben existir al menos dos etapas en el pipeline de GitHub Actions para cada rama:
+test: Debe correr algunas pruebas con el nuevo modelo
+build/promote: Debe desplegar el contenedor en la solución final.
+Pueden considerar más etapas si así lo necesitan para su sistema, pero deben existir estas dos al menos.
+
+ 
+
+Ahora, para el desarrollo del sistema, se proponen los siguientes pasos:
+
+Primero, pueden buscar y obtener cualquier modelo en formato ONNX con el cual se puedan realizar predicciones. Puede ser algún modelo que hayan usado antes o alguno que encuentren en internet, lo importante es que esté en el formato ONNX y listo para realizar cualquier tipo de predicción con el mismo. En la página oficial de ONNXLinks to an external site., pueden encontrar algunos modelos pre-entrenados que pueden usar.
+Este modelo no debe existir en el repositorio como tal, solo una referencia al modelo el cual puedan obtener y descargar en las etapas de CI/CD. Es decir, el archivo con extensión .onnx no puede existir en el repositorio, pero sí alguna referencia (dentro del código o como una variable de entorno) del lugar en donde el modelo estará alojado para obtenerlo, este debe ser algún bucket o algo similar.
+Para le etapa de test:
+Obtener los datos de prueba de algún bucket/warehouse/database a través del terminal o algún script de código. Es decir, la etapa de test en el pipeline debe obtener estos datos de prueba y no deben existir en el repositorio desde antes.
+Una vez se tengan los datos, el modelo en formato ONNX también es obtenido para poder realizar las pruebas
+Finalmente, deben correrse algunas prubeas unitarias en el modelo, incluyendo al menos dos pruebas:
+Probar que el modelo responde con datos de entrada definidos.
+Probar que no existe un cambio significativo en alguna métrica definida dado el modelo que se tenga. Pueden usar algún valor límite y probar que la métrica no es menor/mayor a este valor.
+Para la etapa de build/promote:
+Se debe construir un contenedor Docker. Es decir, el repositorio debería contener algún archivo Dockerfile para la construcción del contenedor con el nuevo modelo. Este contenedor debe contener una aplicación, utilizando Streamlit o APIs con FastAPI/Flask, que permita al usuario interactuar con el modelo y realizar alguna predicción con el mismo. Ya que el modelo en formato ONNX no existe en el repositorio como tal, este paso debe obtener el modelo del bucket o almacenamiento definido para la construcción.
+Luego de construir el contenedor, este se debe enviar a la solución de despliegue final que hayan considerado. Es decir, esta etapa debe actualizar el respectivo endpoint que hayan definido para hacer uso del nuevo contenedor.
+Todo el pipeline de GitHub Actions se debe ejecutar cada vez que se realiza un push a las ramas dev o prod. Es decir, cada vez que existan nuevos cambios en alguna de estas ramas, se deberán correr las etapas test + build/promote + extras (alguna otra etapa si así lo definen o necesitan para su sistema en específico).
+Cada vez que se hagan llamadas a los endpoints dev y prod, dos archivos de texto deben contener todas las predicciones realizadas en formato TXT para futuros monitoreos o análisis. Es decir, cada petición/llamada debe agregar una nueva línea en el respectivo archivo de texto con la nueva predicción realizada. Existirán entonces dos archivos, algo como txt y predicciones_prod.txt, en algún bucket que hayan definido para alojarlos.
+ 
+
+Para el desarrollo de este proyecto, pueden hacer uso de los free tiers que les ofrecen los distintos proveedores de nube. Cada uno de ellos tiene algunos servicios gratuitos que son suficientes para el desarrollo del sistema de despliegue final del contenedor.
+
+A modo de ejemplo, si usan por ejemplo AWS, pueden seguir este tutorial para el despliegue de contenedores usando ECR + ECS + Single EC2 instance. El tutorial hace uso de Fargate (que es un servicio pago) pero lo pueden reemplazar por una sola instancia EC2 y lograr los mismos resultados en este caso. Por otro lado, pueden usar este link como referencia para construir el pipeline con GitHub Actions y tener una guía sobre las etapas que deben realizar.
+
+
+GCP_PROJECT_ID: maestriaia
+GCP_REGIO: us-central1
+nombre del bucket GCS: bucket_taller_mlops
+Artifact Registry: taller-artifact-registry
+nombres para los servicios Cloud Run dev: mlops-onnx-api-dev
+nombres para los servicios Cloud Run prod:mlops-onnx-api-prod
+Clave de api: [REDACTED - no versionar claves en el repositorio]
