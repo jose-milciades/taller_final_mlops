@@ -27,7 +27,7 @@ def get_model(model_path: str) -> OnnxModel:
 @app.get("/health")
 def health() -> dict[str, str]:
     settings = get_settings()
-    return {"status": "ok", "environment": settings.app_env}
+    return {"status": "ok prueba", "environment": settings.app_env}
 
 
 @app.post("/predict", response_model=PredictionResponse)
